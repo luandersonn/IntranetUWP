@@ -38,30 +38,22 @@ namespace IntranetUWP.ViewModels.PagesViewModel
 				var response = await httpClient.PostAsync(loginUrl, content);
 				var result = await response.Content.ReadAsStringAsync();
 				_ = response.EnsureSuccessStatusCode();
-				if (response.StatusCode.ToString() == "OK")
+				var userInfo = JsonConvert.DeserializeObject<UserDTO>(result);
+				if (RemainSignIn == true)
 				{
-					var userInfo = JsonConvert.DeserializeObject<UserDTO>(result);
-					if (RemainSignIn == true)
-					{
-						App.localSettings.Values["UserId"] = userInfo.id;
-						App.localSettings.Values["UserName"] = userInfo.userName;
-						App.localSettings.Values["FirstName"] = userInfo.firstName;
-						App.localSettings.Values["LastName"] = userInfo.lastName;
-						App.localSettings.Values["Password"] = Password;
-						App.localSettings.Values["ProfilePic"] = userInfo.profilePic;
-						App.localSettings.Values["Company"] = userInfo.company;
-						var foodRequest = await httpClient.GetAsync(GetFoodUrl(userInfo.id));
-						var foodResult = await foodRequest.Content.ReadAsStringAsync();
-						var foodInfo = JsonConvert.DeserializeObject<UserFoodDTO>(foodResult);
-						if (foodInfo != null)
-							App.localSettings.Values["FoodId"] = foodInfo.food.id;
-					}
+					App.localSettings.Values["UserId"] = userInfo.id;
+					App.localSettings.Values["UserName"] = userInfo.userName;
+					App.localSettings.Values["FirstName"] = userInfo.firstName;
+					App.localSettings.Values["LastName"] = userInfo.lastName;
+					App.localSettings.Values["Password"] = Password;
+					App.localSettings.Values["ProfilePic"] = userInfo.profilePic;
+					App.localSettings.Values["Company"] = userInfo.company;
+					var foodRequest = await httpClient.GetAsync(GetFoodUrl(userInfo.id));
+					var foodResult = await foodRequest.Content.ReadAsStringAsync();
+					var foodInfo = JsonConvert.DeserializeObject<UserFoodDTO>(foodResult);
+					if (foodInfo != null)
+						App.localSettings.Values["FoodId"] = foodInfo.food.id;
 				}
-				else
-				{
-					throw new Exception();
-				}
-
 				System.Diagnostics.Debug.WriteLine(response.StatusCode.ToString());
 				System.Diagnostics.Debug.WriteLine(result);
 			}
